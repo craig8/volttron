@@ -51,7 +51,9 @@ from volttrontesting.utils.platformwrapper import start_wrapper_platform, \
 
 @pytest.fixture(scope="module")
 def setup_instances():
-
+    instances_file = os.path.expanduser("~/.volttron_instances")
+    if os.path.exists(instances_file):
+        os.remove(instances_file)
     inst1 = PlatformWrapper()
     inst2 = PlatformWrapper()
 
@@ -75,32 +77,37 @@ def test_can_restart_platform_without_addresses_changing(setup_instances):
     assert original_vip == inst_forward.vip_address
 
 
+@pytest.mark.dev
+def test_instance_writes_to_instances_file(setup_instances):
+    v1, v2 = setup_instances
+    assert v1 is not None
+    assert v1.is_running()
 
-@pytest.mark.wrapper
-@pytest.mark.skip("Upgrade to fix.")
-def test_instance_writes_to_instances_file(volttron_instance):
-    vi = volttron_instance
-    assert vi is not None
-    assert vi.is_running()
+    assert v2 is not None
+    assert v2.is_running()
 
     instances_file = os.path.expanduser("~/.volttron_instances")
 
+    assert os.path.isfile(instances_file)
     with open(instances_file, 'r') as fp:
         result = jsonapi.loads(fp.read())
 
-    assert result.get(vi.volttron_home)
-    the_instance_entry = result.get(vi.volttron_home)
+    from pprint import pprint
+    pprint(result)
+
+    assert result.get(v1.volttron_home)
+    assert result.get(v2.volttron_home)
+    the_instance_entry = result.get(v1.volttron_home)
     for key in ('pid', 'vip-address', 'volttron-home', 'start-args'):
         assert the_instance_entry.get(key)
 
-    assert the_instance_entry['pid'] == vi.p_process.pid
+    assert the_instance_entry['pid'] == v1.p_process.pid
 
-    assert the_instance_entry['vip-address'][0] == vi.vip_address
-    assert the_instance_entry['volttron-home'] == vi.volttron_home
+    assert the_instance_entry['vip-address'][0] == v1.vip_address
+    assert the_instance_entry['volttron-home'] == v1.volttron_home
 
 
 @pytest.mark.wrapper
-@pytest.mark.skip("Upgrade to fix.")
 def test_can_install_listener(volttron_instance):
     clear_messages()
     vi = volttron_instance

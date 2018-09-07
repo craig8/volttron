@@ -286,6 +286,7 @@ class Router(BaseRouter):
         self._msgdebug = msgdebug
         self._message_debugger_socket = None
         self._instance_name = instance_name
+        self._ext_routing = None
 
     def setup(self):
         sock = self.socket
@@ -319,7 +320,6 @@ class Router(BaseRouter):
                 address.domain = 'vip'
             address.bind(sock)
             _log.debug('Additional VIP router bound to %s' % address)
-        self._ext_routing = None
 
         self._ext_routing = RoutingService(self.socket, self.context,
                                            self._socket_class, self._poller,

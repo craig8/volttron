@@ -4,6 +4,9 @@ import pickle, json, csv, os, shutil, shelve, logging
 from threading import Thread
 from Queue import Queue
 from copy import deepcopy
+import errno
+import fcntl
+import time
 
 _log = logging.getLogger(__name__)
 
@@ -36,10 +39,24 @@ class PersistentDict(dict):
         self.mode = mode                    # None or an octal triple like 0644
         self.format = format                # 'csv', 'json', or 'pickle'
         self.filename = filename
+
         if flag != 'n' and os.access(filename, os.R_OK):
-            fileobj = open(filename, 'rb' if format == 'pickle' else 'r')
-            with fileobj:
-                self._load(fileobj)
+
+            while True:
+                try:
+                    fileobj = open(filename, 'rb' if format == 'pickle' else 'r')
+                    fcntl.flock(fileobj, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                    with fileobj:
+                        self._load(fileobj)
+                    if not fileobj.closed:
+                        fcntl.flock(fileobj, fcntl.LOCK_UN)
+                    break
+                except IOError as e:
+                    # raise on unrelated IOErrors
+                    if e.errno != errno.EAGAIN:
+                        raise
+                    else:
+                        time.sleep(0.1)
 
         if PersistentDict._process_thread is None:
             PersistentDict._process_thread = Thread(target=PersistentDict._process_loop)
@@ -70,7 +87,7 @@ class PersistentDict(dict):
 
     @staticmethod
     def _update_file(filename, contents, format, mode):
-        #If we are empty delete the store if it exists.
+        # If we are empty delete the store if it exists.
         if not contents:
             try:
                 os.remove(filename)
@@ -90,7 +107,6 @@ class PersistentDict(dict):
         shutil.move(tempname, filename)  # atomic commit
         if mode is not None:
             os.chmod(filename, mode)
-
 
     def close(self):
         self.sync()
