@@ -37,6 +37,7 @@ if [ ! -n "$@" ]; then
   exit 1;
 else
   # echo "now Executing $@";
+  export PATH="/code/volttron/env/bin:$PATH";
   echo $PATH;
   exec /usr/local/bin/gosu volttron "$@";
 fi
