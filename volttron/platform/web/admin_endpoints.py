@@ -6,12 +6,14 @@ import urlparse
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape, TemplateNotFound
 import jwt
+from jwt import DecodeError
 from passlib.hash import argon2
 from watchdog_gevent import Observer
+from werkzeug.exceptions import BadRequest
 
 from volttron.platform import get_home
 from volttron.platform.agent import json
-from volttron.platform.agent.web import Response
+from volttron.platform.agent.web import Response, get_user_claims, BadRequest, Unauthorized
 from volttron.utils import FileReloader
 from volttron.utils.persistance import PersistentDict
 from volttron.platform.certs import Certs
@@ -80,18 +82,17 @@ class AdminEndpoints(object):
 
     def verify_and_dispatch(self, env, data):
 
-        bearer = env.get('HTTP_COOKIE')
-        if not bearer:
+        try:
+            userclaims = get_user_claims(env)
+        except (Unauthorized, DecodeError):
             template = template_env(env).get_template('login.html')
             return Response(template.render(), status='401 Unauthorized')
-
-        cookie = Cookie.SimpleCookie(env.get('HTTP_COOKIE'))
-        bearer = cookie.get('Bearer').value.decode('utf-8')
-
-        claims = jwt.decode(bearer, self._ssl_public_key, algorithms='RS256')
+        except (BadRequest,):
+            template = template_env(env).get_template('login.html')
+            return Response(template.render(), status='400 Bad Request')
 
         # Make sure we have only admins for viewing this.
-        if 'admin' not in claims.get('groups'):
+        if 'admin' not in userclaims.get('groups'):
             return Response('<h1>Unauthorized User</h1>', status="401 Unauthorized")
 
         path_info = env.get('PATH_INFO')
@@ -126,13 +127,13 @@ class AdminEndpoints(object):
         elif endpoint == 'pending_csrs':
             response = self.__pending_csrs_api()
         elif endpoint.startswith('approve_csr/'):
-            response = self.__approve_csr_api(endpoint.split('/')[1])
+            response = self.__approve_csr_api(endpoint.split('/')[1], data)
         else:
             response = Response('{"status": "Unknown endpoint {}"}'.format(endpoint),
                                 content_type="application/json")
         return response
 
-    def __approve_csr_api(self, common_name):
+    def __approve_csr_api(self, common_name, data):
         try:
             self._certs.approve_csr(common_name)
             data = dict(status=self._certs.get_csr_status(common_name),
