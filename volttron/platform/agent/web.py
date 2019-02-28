@@ -1,20 +1,28 @@
-from abc import ABCMeta, abstractmethod
 import base64
 import Cookie
 
 import jwt
-
-
-class NotAuthorized(Exception):
-    pass
+from werkzeug.exceptions import BadRequest, Unauthorized
 
 
 def get_bearer(env):
-    cookiestr = env.get('HTTP_COOKIE')
-    if not cookiestr:
-        raise NotAuthorized()
-    cookie = Cookie.SimpleCookie(cookiestr)
-    bearer = cookie.get('Bearer').value.decode('utf-8')
+    # Bearer info can be in two different locations.  Either in the Authorization
+    # header or as part of the cookie.  The Authorization header takes precedence
+    # if both are set.
+    bearer = env.get('HTTP_AUTHORIZATION')
+    if not bearer:
+        cookiestr = env.get('HTTP_COOKIE')
+        if not cookiestr:
+            raise Unauthorized()
+        cookie = Cookie.SimpleCookie(cookiestr)
+        bearer = cookie.get('Bearer').value.decode('utf-8')
+    else:
+        # Verify that the value of HTTP_AUTHORIZATINO is
+        # Bearer <jwt>
+        if not bearer.startswith('Bearer '):
+            raise BadRequest()
+        bearer = bearer.split(' ')[1].decode('utf-8')
+
     return bearer
 
 
