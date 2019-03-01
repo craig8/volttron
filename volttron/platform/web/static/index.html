@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>VOLTTRON </title>
     <style type="text/css">
         body{
             background-color: black;
@@ -15,13 +15,17 @@
             border-bottom: 20px;
             text-align: center;
         }
-        #content{
-            width: 800px;
-        }
-
         p{
             padding-bottom:10px;
             border-bottom:10px;
+        }
+
+        a {
+            color: teal;
+        }
+
+        a:hover{
+            color: gold;
         }
     </style>
 </head>
@@ -29,16 +33,39 @@
     <div id="header"><img height="100" id="logotag" src="logo-tagline.png" /></div>
     <div id="content">
         <p>
-            You are accessing the default page of a web enabled volttron node.  This content is
-            located in the volttron/platform/web/static directory in the volttron distribution.
-            You may use or remove this folder to make it un-available.
+        You are accessing the default page of a web enabled VOLTTRON node. This content is located in the
+        volttron/platform/web/static directory in the VOLTTRON distribution. You can modify the index.html file to
+        customize the behavior of this page or remove it if this feature is not required by this instance of VOLTTRON.
         </p>
         <p>
-            Your volttron comes with
-            <ul>
-                <li><a href="/admin/login.html">Login to Admininstration Area</a></li>
-            </ul>
+            <a href="/admin/login.html">Login to Admininstration Area</a>
         </p>
+        <p>
+            We have assembled a list of common links to help introduce you to our platform:
+        </p>
+        <ul>
+            <li>
+                To learn the history of VOLTTRON please visit the main VOLTTRON site at
+                <a href="https://volttron.org" target="_blank">https://volttron.org</a>
+            </li>
+            <li>
+                To learn more about the platform and how to apply VOLTTRON to your use case, please check out
+                <a href="https://volttron.readthedocs.io/" target="_blank">VOLTTRON Read the Docs</a>
+                (https://volttron.readthedocs.io/)
+            </li>
+            <li>
+                To get started, read (<a href="https://volttron.readthedocs.io/en/develop/install.html" target="_blank">https://volttron.readthedocs.io/en/develop/install.html</a>) or watch
+                (<a href="https://www.youtube.com/watch?v=_KFo_mrOOTc" target="_blank">https://www.youtube.com/watch?v=_KFo_mrOOTc</a>) our tutorial on setting up an environment and
+                installing VOLTTRON.
+            </li>
+            <li>
+                Want to contact the Volttron team? Check out our Github Repository
+                (<a href="https://github.com/VOLTTRON/volttron" target="_blank">https://github.com/VOLTTRON/volttron</a>) or visit Slack
+                (<a href="https://volttron-community.slack.com/" target="_blank">https://volttron-community.slack.com/</a>).
+                Email <a href="mailto:volttron@pnnl.gov?subject=Subscribe to slack and mailing list">volttron@pnnl.gov</a> to
+                access both our slack and the VOLTTRON mailing list.
+            </li>
+        </ul>
     </div>
 
 </body>

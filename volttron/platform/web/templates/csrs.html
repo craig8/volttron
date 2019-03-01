@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}CSR Administration{% endblock %}
+{% block js %}
+<script language="JavaScript">
+    $(document).ready(() => {
+      alert("REady")
+    };
+</script>
+{% endblock %}
+{% block content %}
+    <h1>CSR Administration</h1>
+    <table>
+        <thead>
+            <tr>
+                <th width="300">Operations</th>
+                <th width="200">Status</th>
+                <th width="250">Identity</th>
+                <th width="150">Ip Address</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for c in csrs %}
+            <tr>
+                <td align="center">
+                    <form id="form_{{ c.identity }}">
+                        {% if c.status == "APPROVED" %}
+                        <button id="revoke_{{ c.identity }}">Revoke</button>
+                        {% endif %}
+                        {% if c.status == "PENDING" %}
+                        <button id="approve_{{ c.identity}}">Approve</button>
+                        <button id="deny_{{ c.identity }}">Deny</button>
+                        {% endif %}
+                        <!--<input type="checkbox" name="read" /> Read-->
+                        <!--<input type="checkbox" name="write" /> Write-->
+                    </form>
+                </td>
+                <td align="center">{{ c.status }}</td>
+                <td>{{ c.identity }}</td>
+                <td>{{ c.remote_ip_address }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

@@ -10,6 +10,9 @@
             font-size: 14pt;
             font-family: "Helvetica Neue", "Helvetica", "Arial", sans-serif;
         }
+        ul{
+            list-style-type: none;
+        }
         #header{
             padding-bottom: 20px;
             border-bottom: 20px;
@@ -22,17 +25,26 @@
         p{
             padding-bottom:10px;
             border-bottom:10px;
+            padding-top: 5px;
+            border-top: 5px;
+        }
+        a {
+            color: teal;
+        }
+        a:hover {
+            color: gold;
         }
     </style>
+    {% block js %}{% endblock %}
 </head>
 <body>
     <div id="header"><img height="100" id="logotag" src="/logo-tagline.png" /></div>
     <div id="top_menu">
         <ul>
-            <li><a href="/admin/list_certs.html">List x509 Certificates</a></li>
+            <!--<li><a href="/admin/list_certs.html">List x509 Certificates</a></li>-->
             <!--<li><a href="/admin/certs/create">Create Certificate</a></li>-->
-            <li><a href="/admin/pending_csrs.html">Pending CSR Requests</a></li>
-            <li><a href="/admin/create_csr.html">Create CSR Request</a></li>
+            <li><a href="/admin/csrs.html">CSR Requests</a></li>
+            <!--<li><a href="/admin/create_csr.html">Create CSR Request</a></li>-->
         </ul>
     </div>
     <div id="content">{% block content %}{% endblock %}</div>

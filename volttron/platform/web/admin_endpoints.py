@@ -109,7 +109,7 @@ class AdminEndpoints(object):
 
             if page == 'list_certs.html':
                 html = template.render(certs=self._certs.get_all_cert_subjects())
-            elif page == 'pending_csrs.html':
+            elif page == 'csrs.html':
                 html = template.render(csrs=self._certs.get_pending_csr_requests())
             else:
                 # A template with no params.
