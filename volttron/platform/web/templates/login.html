@@ -3,13 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <style type="text/css">
+        body{
+            background-color: black;
+            color: white;
+            font-size: 14pt;
+            font-family: "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+        }
+        ul{
+            list-style-type: none;
+        }
+        #header{
+            padding-bottom: 20px;
+            border-bottom: 20px;
+            text-align: center;
+        }
+        #content{
+            width: 800px;
+        }
+
+        p{
+            padding-bottom:10px;
+            border-bottom:10px;
+            padding-top: 5px;
+            border-top: 5px;
+        }
+        a {
+            color: teal;
+        }
+        a:hover {
+            color: gold;
+        }
+    </style>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script language="JavaScript">
         $(document).ready(() => {
             $("#status").hide();
             $("form").submit((event) =>{
                 event.preventDefault();
-                url = '/authenticate'
+                url = '/authenticate';
                 data = {
                     'username': $('#username').val(),
                     'password': $('#password').val()
@@ -28,11 +60,11 @@
                         'Accept': 'application/json'
                     },
                     success: function(content){
-                        alert(content)
+                        alert(content);
                         $("#response").append(content)
                     },
                     failure: function(content){
-                        alert("failed!")
+                        alert("failed!");
                         $('#response').append("FAILURE "+ content.toString());
                     },
                     statusCode: {
@@ -52,7 +84,7 @@
     </script>
 </head>
 <body>
-    <h1>Authentication</h1>
+    <h1>Administration Login</h1>
     <form>
         <div id="status">
             <label style="color: red">Invalid username/password specified</label>

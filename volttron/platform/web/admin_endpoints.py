@@ -129,10 +129,32 @@ class AdminEndpoints(object):
             response = self.__pending_csrs_api()
         elif endpoint.startswith('approve_csr/'):
             response = self.__approve_csr_api(endpoint.split('/')[1], data)
+        elif endpoint.startswith('revoke_csr/'):
+            response = self.__revoke_csr_api(endpoint.split('/')[1], data)
+        elif endpoint.startswith('deny_csr/'):
+            response = self.__deny_csr_api(endpoint.split('/')[1], data)
         else:
             response = Response('{"status": "Unknown endpoint {}"}'.format(endpoint),
                                 content_type="application/json")
         return response
+
+    def __revoke_csr_api(self, common_name, data):
+        try:
+            self._certs.deny_csr(common_name)
+            data = dict(status="DENIED")
+
+        except ValueError as e:
+            data = dict(status="ERROR", message=e.message)
+
+        return Response(json.dumps(data), content_type="application/json")
+
+    def __deny_csr_api(self, common_name, data):
+        try:
+            self._certs.deny_csr(common_name)
+        except ValueError as e:
+            data = dict(status="ERROR", message=e.message)
+
+        return Response(json.dumps(data), content_type="application/json")
 
     def __approve_csr_api(self, common_name, data):
         try:

@@ -2,9 +2,32 @@
 {% block title %}CSR Administration{% endblock %}
 {% block js %}
 <script language="JavaScript">
+    function revoke(identity) {
+                row = "row_" + identity;
+        //alert(row);
+        $("."+row).hide();
+        alert("After hide")
+    }
+    function accept(identity) {
+        url = '/admin/api/approve_csr/'+identity;
+        jQuery.get(url, (data) =>{
+            location.reload();
+        })
+
+    }
+    function deny(identity) {
+        url = '/admin/api/deny_csr/'+identity;
+        jQuery.get(url, (data) =>{
+            location.reload();
+        })
+    }
+    // $(document).ready(() => {
+    //   alert("REady")
+    // };
     $(document).ready(() => {
-      alert("REady")
-    };
+        $(".row_v1.v2.data.puller.again").hide();
+    });
+
 </script>
 {% endblock %}
 {% block content %}
@@ -20,19 +43,23 @@
         </thead>
         <tbody>
             {% for c in csrs %}
-            <tr>
+            <tr class="row_{{ c.identity }}">
                 <td align="center">
-                    <form id="form_{{ c.identity }}">
-                        {% if c.status == "APPROVED" %}
-                        <button id="revoke_{{ c.identity }}">Revoke</button>
-                        {% endif %}
-                        {% if c.status == "PENDING" %}
-                        <button id="approve_{{ c.identity}}">Approve</button>
-                        <button id="deny_{{ c.identity }}">Deny</button>
-                        {% endif %}
-                        <!--<input type="checkbox" name="read" /> Read-->
-                        <!--<input type="checkbox" name="write" /> Write-->
-                    </form>
+
+                    {% if c.status == "APPROVED" %}
+                    &nbsp;
+                    <!--<a href="#"-->
+                       <!--title="Removes existing certificates so that the client no longer has access"-->
+                       <!--onclick="javascript:accept('{{ c.identity }}'); return false;">Revoke</a>-->
+                    {% endif %}
+                    {% if c.status == "PENDING" %}
+                    <a href="#"
+                       title="Creates a certificate allowing the client to access the message bus"
+                       onclick="accept('{{ c.identity }}'); return true;">Approve</a>
+                    <a href="#"
+                       title="Denies the access to the client, removing the CSR from the system (does not prevent client from asking again)"
+                       onclick="deny('{{ c.identity }}'); return true;">Deny</a>
+                    {% endif %}
                 </td>
                 <td align="center">{{ c.status }}</td>
                 <td>{{ c.identity }}</td>

@@ -467,6 +467,15 @@ class Certs(object):
 
         return csr.subject.get_attributes_for_oid(NameOID.COMMON_NAME)[0].value
 
+    def deny_csr(self, common_name):
+        metafile = os.path.join(self.csr_pending_dir, common_name + ".json")
+        csrfile = os.path.join(self.csr_pending_dir, common_name + ".csr")
+
+        if os.path.isfile(metafile):
+            os.remove(metafile)
+        if os.path.isfile(csrfile):
+            os.remove(csrfile)
+
     def save_pending_csr_request(self, ip_addr, common_name, csr):
         meta = dict(remote_ip_address=ip_addr, identity=common_name,
                     csr=csr, status="PENDING")
