@@ -42,6 +42,7 @@ import argparse
 import calendar
 import errno
 import logging
+import socket
 import sys
 import syslog
 import traceback
@@ -163,6 +164,7 @@ def load_config(config_path):
             _log.error("Problem parsing agent configuration")
             raise
 
+
 def load_platform_config():
     """Loads the platform config file if the path exists."""
     config_opts = {}
@@ -173,6 +175,13 @@ def load_platform_config():
         options = parser.options('volttron')
         for option in options:
             config_opts[option] = parser.get('volttron', option)
+
+    # 1919 - The following code should allow a config without
+    # an instance-name entry to be defaulted to the hostname.
+    #
+    # This assumes that the hostname is resolvable.
+    if 'instance-name' not in config_opts:
+        config_opts['instance-name'] = socket.gethostname()
     return config_opts
 
 
