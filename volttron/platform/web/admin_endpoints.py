@@ -3,6 +3,7 @@ import logging
 import os
 import re
 import urlparse
+import weakref
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape, TemplateNotFound
 import jwt
@@ -27,7 +28,7 @@ def template_env(env):
 
 class AdminEndpoints(object):
 
-    def __init__(self, ssl_public_key):
+    def __init__(self, ssl_public_key, core):
 
         self._userdict = None
         self._ssl_public_key = ssl_public_key
@@ -40,6 +41,7 @@ class AdminEndpoints(object):
         )
         self._observer.start()
         self._certs = Certs()
+        self._core = weakref.ref(core)
 
     def reload_userdict(self):
         webuserpath = os.path.join(get_home(), 'web-users.json')
@@ -75,7 +77,6 @@ class AdminEndpoints(object):
 
         if 'login.html' in env.get('PATH_INFO') or '/admin/' == env.get('PATH_INFO'):
             template = template_env(env).get_template('login.html')
-            resp = template.render()
             return Response(template.render())
 
         return self.verify_and_dispatch(env, data)
@@ -138,6 +139,11 @@ class AdminEndpoints(object):
             self._certs.approve_csr(common_name)
             data = dict(status=self._certs.get_csr_status(common_name),
                         cert=self._certs.get_cert_from_csr(common_name))
+
+            permissions = self._core().rmq_mgmt.get_default_permissions(common_name)
+            self._core().rmq_mgmt.create_user_with_permissions(common_name,
+                                                               permissions,
+                                                               True)
         except ValueError as e:
             data = dict(status="ERROR", message=e.message)
 

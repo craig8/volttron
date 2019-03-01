@@ -545,7 +545,9 @@ class MasterWebService(Agent):
             return
 
         self._admin_endpoints = AdminEndpoints(
-            self._certs.get_cert_public_key(get_fq_identity(self.core.identity)))
+            self._certs.get_cert_public_key(get_fq_identity(self.core.identity)),
+            self.core
+        )
         import urlparse
         ssl_cert = None
         ssl_key = None
