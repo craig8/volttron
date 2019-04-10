@@ -46,7 +46,7 @@ from pprint import pprint
 import re
 import sys
 
-from volttron.platform.vip.agent import Core, Agent
+from volttron.platform.vip.agent import Core, Agent, WebSubSystem
 from volttron.platform.agent import utils
 from volttron.platform import jsonrpc
 
@@ -104,9 +104,10 @@ class SimpleWebAgent(Agent):
         # Endpoint will be available at http://localhost:8080/simple/text
         self.vip.web.register_endpoint("/simple/text", callback=self.text)
         
-        # Endpoint will be available at http://localhost:8080/simple/jsonrpc
+        # Endpoint will be available at http://localhost:8080/simpleweb/jsonrpc
         self.vip.web.register_endpoint("/simpleweb/jsonrpc", self.rpcendpoint)
 
+    @WebSubSystem.route('/simple/text')
     def text(self, env, data):
         """
         Text/html content type specified so the browser can act appropriately.

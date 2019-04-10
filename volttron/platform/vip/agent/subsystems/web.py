@@ -35,13 +35,15 @@
 # BATTELLE for the UNITED STATES DEPARTMENT OF ENERGY
 # under Contract DE-AC05-76RL01830
 # }}}
-
+import inspect
 from collections import defaultdict
 import logging
 import weakref
 
 from volttron.platform.agent.known_identities import MASTER_WEB
-from volttron.platform.vip.agent.subsystems.base import SubsystemBase
+
+from .base import SubsystemBase
+from ..decorators import dualmethod, annotations, annotate
 
 __docformat__ = 'reStructuredText'
 
@@ -61,6 +63,7 @@ class WebSubSystem(SubsystemBase):
         self._core = weakref.ref(core)
         self._endpoints = {}
         self._ws_endpoint = {}
+        self._routes = {}
 
         rpc.export(self._opened, 'client.opened')
         rpc.export(self._closed, 'client.closed')
@@ -70,7 +73,31 @@ class WebSubSystem(SubsystemBase):
         def onstop(sender, **kwargs):
             rpc.call(MASTER_WEB, 'unregister_all_agent_routes')
 
+        # def route(member):   # pylint: disable=redefined-outer-name
+        #     for name in annotations(member, set, 'web.routes'):
+        #         self._routes[name] = member
+        # inspect.getmembers(owner, route)
+
         core.onstop.connect(onstop, self)
+
+    @dualmethod
+    def route(self, method):
+        _log.debug(method.__name__)
+        self._routes[method or method.__name__] = method
+        return method
+
+    @route.classmethod
+    def route(cls, name=None):
+        _log.debug("Class method {}".format(name))
+        if not isinstance(name, basestring):
+            method, name = name, name.__name__
+            annotate(method, set, 'web.routes', name)
+            return method
+
+        def decorate(method):
+            annotate(method, set, 'web.routes', name)
+            return method
+        return decorate
 
     def unregister_all_routes(self):
         self._rpc().call(MASTER_WEB, 'unregister_all_agent_routes')
