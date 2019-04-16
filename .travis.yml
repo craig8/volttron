@@ -2,7 +2,7 @@ language: python
 #sudo: required
 env:
   - FAST_FAIL=1
-script: ci-integrations/run-tests/docker.sh
+script: ci-integrations/run-test-docker.sh
 #matrix:
 #  include:
 #    #precise with ones that don't include dist
