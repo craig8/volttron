@@ -299,6 +299,10 @@ class PlatformWrapper:
         except AuthFileEntryAlreadyExists:
             pass
 
+        if self.messagebus == 'rmq' and self.bind_web_address is not None:
+            self.enable_auto_csr()
+            self.web_admin_api.create_web_admin('admin', 'admin')
+
     def get_agent_identity(self, agent_uuid):
         path = os.path.join(self.volttron_home, 'agents/{}/IDENTITY'.format(agent_uuid))
         with open(path) as f:
@@ -521,7 +525,7 @@ class PlatformWrapper:
         self.set_auth_dict(auth_dict)
 
         if self.messagebus == 'rmq' and bind_web_address:
-                self.env['REQUESTS_CA_BUNDLE'] = self.certsobj.cert_file(self.certsobj.root_ca_name)
+            self.env['REQUESTS_CA_BUNDLE'] = self.certsobj.cert_file(self.certsobj.root_ca_name)
 
         if self.remote_platform_ca:
             ca_bundle_file = os.path.join(self.volttron_home, "cat_ca_certs")
@@ -652,6 +656,8 @@ class PlatformWrapper:
 
         # Use dynamic_agent so we can look and see the agent with peerlist.
         self.dynamic_agent = self.build_agent(identity="dynamic_agent")
+        assert self.dynamic_agent is not None
+        assert isinstance(self.dynamic_agent, Agent)
         has_control = False
         times = 0
         while not has_control and times < 10:
@@ -1150,19 +1156,6 @@ class PlatformWrapper:
                 proc = psutil.Process(pid)
                 proc.terminate()
 
-        if os.environ.get('PRINT_LOG'):
-            logpath = os.path.join(self.volttron_home, 'volttron.log')
-            if os.path.exists(logpath):
-                print("************************* Begin {}".format(logpath))
-                with open(logpath) as f:
-                    for l in f.readlines():
-                        print(l)
-                print("************************* End {}".format(logpath))
-            else:
-                print("######################### No Log Exists: {}".format(
-                    logpath
-                ))
-
         print(" Skip clean up flag is {}".format(self.skip_cleanup))
         if self.messagebus == 'rmq':
             print("Calling rabbit shutdown")
@@ -1243,7 +1236,15 @@ class WebAdminApi(object):
         """
         data = dict(username=username, password1=password, password2=password)
         url = self.bind_web_address +"/admin/setpassword"
-        resp = requests.post(url, data, verify=self.certsobj.cert_file(self.certsobj.root_ca_name))
+        resp = requests.post(url, data, verify=self.certsobj.remote_cert_bundle_file())
+        assert resp.ok
+
+        return resp
+
+    def authenticate(self, username, password):
+        data = dict(username=username, password=password)
+        url = self.bind_web_address+"/authenticate"
+        resp = requests.post(url, data, verify=self.certsobj.remote_cert_bundle_file())
         assert resp.ok
 
         return resp
