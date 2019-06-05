@@ -129,13 +129,8 @@ def threshold_tester_agent(volttron_instance):
                                           enable_store=True)
 
     agent.reset_store()
-    # agent.vip.rpc.call(CONFIGURATION_STORE,
-    #                    'manage_store',
-    #                    'platform.thresholddetection',
-    #                    'config',
-    #                    json.dumps(_test_config),
-    #                    'json').get()
-
+    # Sleep so the config store has a chance to reset itself before continuing on
+    gevent.sleep(0.1)
     yield agent
 
     agent.vip.rpc.call(CONFIGURATION_STORE,
