@@ -108,7 +108,8 @@ def install_agent_directory(opts, package, agent_config):
         sys.exit(-10)
 
     agent_exists = False
-    volttron_control = os.path.join(get_volttron_root(), "env/bin/vctl")
+    # volttron_control must be on the path already.
+    volttron_control = "vctl"
     if opts.vip_identity is not None:
         # if the identity exists the variable will have the agent uuid in it.
         agent_exists = identity_exists(volttron_control, opts.vip_identity)
