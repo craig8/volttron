@@ -68,7 +68,7 @@ The driver configuration works as follows:
         GROUP_ID - This is an arbitrary string used to specify groups of thermostats.
         For the purposes of the Ecobee driver, it is recommended that a group correspond
         to the list of thermostats operated under a single user account (as Ecobee
-        provides data foor all thermostats on a user's account with a data request).
+        provides data for all thermostats on a user's account with a data request).
         If only one user is running Ecobee drivers on a platform, this value can be
         left at the default, but it should contain some string in any case.
 
