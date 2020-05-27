@@ -1,7 +1,7 @@
 Ecobee Driver
 =============
 
-The Ecobee driver is an implementation of a VOLTTRON driver frame work Interface.
+The Ecobee driver is an implementation of a VOLTTRON driver framework Interface.
 An instance of a VOLTTRON Interface serves as an interface between the VOLTTRON
 Master Driver agent and some device. In the case of the Ecobee driver, the
 interface is responsible for providing a way for the Master Driver to retrieve
@@ -118,7 +118,7 @@ The following configuration is the basic starting point configuration file:
         "timezone": "UTC"
     }
 
-Notice:
+.. note::
 
     ACCESS_TOKEN, REFRESH_TOKEN, AUTHORIZATION_CODE and PIN values are all left as empty strings. These
     values will be obtained by the driver as it starts. After starting, the user will be required to validate the
@@ -155,7 +155,10 @@ same range of data in a similar format.
 
 This is an example registry configuration:
 
-    Point Name,Volttron Point Name,Units,Type,Writable,Readable,Default Value,Notes
+.. csv-table:: Example Ecobee Registry File
+   :header: "Point Name", "Volttron Point Name", "Units", "Type", "Writable", "Readable", "Default Value", "Notes"
+   :widths: 15, 30, 10, 15, 10, 10, 15, 30
+
     fanMinOnTime,fanMinOnTime,seconds,setting,True,True,,
     hvacMode,hvacMode,seconds,setting,True,True,,
     humidity,humidity,%,setting,False,True,,
@@ -204,11 +207,9 @@ Installation
 
 These are the most basic installation steps for the Ecobee driver. This guide
 assumes the user is in the VOLTTRON_ROOT directory, the VOLTTRON platform has
-been installed and bootstrapped per the  instructions in the VOLTTRON README,
-and that the Driver HTTP Cache agent has been installed using the installation
-instructions above.
+been installed and bootstrapped.
 
-Below are the seup instructions.
+Below are the setup instructions.
 
     1. If the platform has not been started:
 
@@ -360,12 +361,11 @@ Instructions for finding your API key can be found here:
 https://www.ecobee.com/home/developer/api/examples/ex1.shtml Under the Example
 1 header.
 
-Authenicating the Ecobee Driver using the PIN can be found at the same link
+Authenticating the Ecobee Driver using the PIN can be found at the same link
 under Example 1 step 1 subheader.
 
 Finding Device Identifier
 -------------------------
-
 
 To find your Ecobee thermostat's device identifier:
 
