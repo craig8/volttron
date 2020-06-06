@@ -53,7 +53,7 @@ import gevent
 import gevent.event
 from gevent import subprocess
 from gevent.subprocess import PIPE
-from wheel.tool import unpack
+from wheel.cli import unpack
 
 from volttron.platform import certs
 from volttron.platform.agent.known_identities import VOLTTRON_CENTRAL_PLATFORM

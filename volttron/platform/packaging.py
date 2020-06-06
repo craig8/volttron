@@ -49,7 +49,7 @@ import tempfile
 import traceback
 import errno
 
-from wheel.install import WheelFile
+from wheel.wheelfile import WheelFile
 from volttron.platform.packages import *
 from volttron.platform.agent import utils
 from volttron.platform import get_volttron_data, get_home
@@ -525,7 +525,7 @@ def _create_cert_ui(cn):
 
 def add_files_to_package(package, files=None):
 
-    whl = VolttronPackageWheelFileNoSign(package, append=True)
+    whl = VolttronPackageWheelFileNoSign(package, mode="a")
     whl.add_files(files, whl)
 
 
