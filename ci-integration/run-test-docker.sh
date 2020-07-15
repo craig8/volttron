@@ -36,7 +36,8 @@ docker build --network=host -t volttron_test_base -f ./ci-integration/virtualiza
 docker build --network=host -t volttron_test_image -f ./ci-integration/virtualization/Dockerfile.testing .
 
 # Specific directories to scan for tests in
-testdirs=(services volttrontesting)
+#testdirs=(services volttrontesting)
+testdirs=(volttrontesting/testutils)
 ignoredirs=(services/core/DNP3Agent services/core/IEEE2030_5Agent services/core/OpenADRVenAgent)
 
 # Local path for out puting bamboo based xml for integration with that ci build tool.
