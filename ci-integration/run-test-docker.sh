@@ -6,9 +6,6 @@ set -e # fail if any command errors without being caught with an || or an 'if'.
 # runs each of the test modules inside a docker container based
 # upon the test image.
 
-# Default to fast fail though allow it to be overwritten.
-#export FAST_FAIL=${FAST_FAIL:-true}
-
 # A possible argument passed to the script is the number docker containers
 # to run at a single time.
 if [[ $# -eq 0 ]]; then
@@ -17,6 +14,7 @@ else
     export NUM_PROCESSES=$1
 fi
 
+# Default to fast fail though allow it to be overwritten.
 export FAST_FAIL=${FAST_FAIL:-true}
 
 pip list
@@ -40,6 +38,11 @@ docker build --network=host -t volttron_test_image -f ./ci-integration/virtualiz
 # Specific directories to scan for tests in
 testdirs=(services volttrontesting)
 ignoredirs=(services/core/DNP3Agent services/core/IEEE2030_5Agent services/core/OpenADRVenAgent)
+
+# Local path for out puting bamboo based xml for integration with that ci build tool.
+PYTEST_XML_OUTDIR="./pytestxml"
+
+mkdir "$PYTEST_XML_OUTDIR"
 
 # State variable for when a test has failed the entire set needs to be considered
 # failed.
@@ -70,7 +73,7 @@ run_test(){
     base_filename="$(basename "$filename")"
     # Start the docker run module.
     docker run -e "IGNORE_ENV_CHECK=1" --name "$base_filename" \
-        -t volttron_test_image pytest "$filename" > "$base_filename.result.txt" 2>&1 &
+        -t volttron_test_image pytest "$filename" --junitxml="$PYTEST_XML_OUTDIR/$base_filename.xml"> "$base_filename.result.txt" 2>&1 &
     runningprocs+=($!)
     outputfiles+=("$base_filename.result.txt")
     containernames+=("$base_filename")
