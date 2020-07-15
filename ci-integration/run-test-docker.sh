@@ -15,7 +15,7 @@ else
 fi
 
 # Default to fast fail though allow it to be overwritten.
-export FAST_FAIL=${FAST_FAIL:-true}
+export FAST_FAIL=${FAST_FAIL:-false}
 
 pip list
 echo "RUNNING $NUM_PROCESSES PARALLEL PROCESSESS AT A TIME"
