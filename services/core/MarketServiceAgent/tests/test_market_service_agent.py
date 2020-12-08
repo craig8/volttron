@@ -41,6 +41,8 @@ import json
 import gevent
 import pytest
 
+numpy = pytest.importorskip("numpy")
+
 from market_service.market_participant import MarketParticipant
 from volttron.platform.agent.base_market_agent.buy_sell import BUYER
 from volttron.platform.messaging.health import STATUS_GOOD

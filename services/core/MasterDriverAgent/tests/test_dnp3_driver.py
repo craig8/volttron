@@ -1,10 +1,15 @@
-import pytest
-import gevent
 import logging
-from services.core.DNP3Agent.dnp3 import DATA_TYPE_ANALOG_INPUT
+
+import gevent
+import pytest
+
+docker = pytest.importorskip("pydnp3")
+
 from volttron.platform.agent.known_identities import PLATFORM_DRIVER
 from volttron.platform import get_services_core
 from volttron.platform.agent import utils
+
+from DNP3Agent.dnp3 import DATA_TYPE_ANALOG_INPUT
 
 utils.setup_logging()
 logger = logging.getLogger(__name__)

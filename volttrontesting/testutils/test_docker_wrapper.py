@@ -1,5 +1,6 @@
 import pytest
 
+docker = pytest.importorskip("docker")
 
 try:
     SKIP_DOCKER = False

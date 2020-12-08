@@ -41,21 +41,19 @@ import json
 import random
 import gevent
 import pytest
+
 from dateutil.tz import tzutc
 from datetime import datetime
 from datetime import timedelta
+
+docker = pytest.importorskip("docker")
+pymongo = pytest.importorskip("pymongo")
+HAS_PYMONGO = True
 
 from volttron.platform import get_services_core
 from volttron.platform.agent import utils
 from volttron.platform.agent.utils import get_aware_utc_now, format_timestamp
 from volttron.platform.messaging import headers as headers_mod
-
-try:
-    import pymongo
-
-    HAS_PYMONGO = True
-except:
-    HAS_PYMONGO = False
 
 from fixtures import (ALL_TOPIC, BASE_ANALYSIS_TOPIC, BASE_DEVICE_TOPIC, mongo_connection_params, mongo_agent_config,
                       mongo_connection_string)

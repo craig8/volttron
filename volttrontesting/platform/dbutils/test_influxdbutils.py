@@ -3,6 +3,9 @@ from time import time
 from gevent import sleep, os
 import pytest
 
+docker = pytest.importorskip("docker")
+influxdb = pytest.importorskip("influxdb")
+
 try:
     from influxdb import InfluxDBClient
 except ImportError:

@@ -27,6 +27,9 @@
 # favoring by 8minutenergy or Kisensum.
 # }}}
 
+import pytest
+
+docker = pytest.importorskip("pydnp3")
 
 import os
 

@@ -9,6 +9,8 @@ from time import time, sleep
 
 import pytest
 
+docker = pytest.importorskip("docker")
+mysql = pytest.importorskip("mysql")
 try:
     import mysql.connector
 except ImportError:

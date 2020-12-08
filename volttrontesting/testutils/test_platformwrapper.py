@@ -251,6 +251,9 @@ def test_can_stop_vip_heartbeat(volttron_instance):
     agent = vi.build_agent(heartbeat_autostart=True,
                            heartbeat_period=1,
                            identity='Agent')
+
+    assert agent.core.identity == 'Agent'
+
     agent.vip.pubsub.subscribe(peer='pubsub', prefix='heartbeat/Agent',
                                callback=onmessage)
 

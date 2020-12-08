@@ -43,6 +43,10 @@ import sqlite3
 
 import gevent
 import pytest
+
+# Only run these tests if pint is installed.
+pint = pytest.importorskip("pint")
+
 from mock import MagicMock
 
 from volttron.platform.agent import utils

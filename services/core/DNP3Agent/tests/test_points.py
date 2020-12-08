@@ -1,8 +1,9 @@
 import pytest
-try:
-    import dnp3
-except ImportError:
-    pytest.skip("pydnp3 not found!", allow_module_level=True)
+
+# Skip tests when we don't have these specific modules available
+# to test with.  Add others that some agents are required, but
+# unavailable.
+dnp3 = pytest.importorskip("pydnp3")
 
 import copy
 

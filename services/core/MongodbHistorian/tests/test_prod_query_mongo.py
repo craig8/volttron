@@ -1,5 +1,10 @@
 import pytest
 from datetime import datetime
+
+docker = pytest.importorskip("docker")
+pymongo = pytest.importorskip("pymongo")
+HAS_PYMONGO = True
+
 # building name replaced. replace before testing
 from volttron.platform import get_services_core
 from fixtures import (ALL_TOPIC, BASE_ANALYSIS_TOPIC, BASE_DEVICE_TOPIC,

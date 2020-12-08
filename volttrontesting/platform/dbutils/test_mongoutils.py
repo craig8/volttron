@@ -4,6 +4,9 @@ from time import time
 from gevent import sleep
 import pytest
 
+docker = pytest.importorskip("docker")
+pymongo = pytest.importorskip("pymongo")
+
 import volttron.platform.dbutils.mongoutils as mongoutils
 from volttrontesting.fixtures.docker_wrapper import create_container
 from volttrontesting.utils.utils import get_rand_port
