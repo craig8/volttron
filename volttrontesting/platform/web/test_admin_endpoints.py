@@ -190,11 +190,3 @@ def test_add_user():
         assert original_hashed_passwordd != user['hashed_password']
 
 
-@pytest.mark.web
-def test_construction():
-
-    # within rabbitmq mgmt this is used
-    with patch("volttron.platform.agent.utils.get_platform_instance_name",
-               return_value="volttron"):
-        mgmt = RabbitMQMgmt()
-        assert mgmt is not None

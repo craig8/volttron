@@ -190,6 +190,7 @@ def create_volttron_home() -> str:
     # the volttron.log file is not part of the same folder for
     # observer.
     volttron_home = os.path.join(volttron_home, "volttron_home")
+    os.makedirs(volttron_home)
     return volttron_home
 
 
@@ -1495,25 +1496,25 @@ class WebAdminApi(object):
         :param password:
         :return:
         """
-        #     from volttron.platform.web.admin_endpoints import AdminEndpoints
-        #     from volttrontesting.utils.web_utils import get_test_web_env
-        #
-        #     params = urlencode(dict(username='admin', password1='admin', password2='admin'))
-        #     env = get_test_web_env("/admin/setpassword", method='POST')  # , input_data=input)
-        #     adminep = AdminEndpoints()
-        #     resp = adminep.admin(env, params)
-        # else:
-        if messagebus == 'rmq':
-            data = dict(username=username, password1=password, password2=password)
-            url = self.bind_web_address + "/admin/setpassword"
-            # resp = requests.post(url, data=data,
-            # verify=self.certsobj.remote_cert_bundle_file())
-            resp = requests.post(url, data=data,
-                                 verify=self.certsobj.cert_file(
-                                     name=self.certsobj.root_ca_name))
-            return resp
-        else:
-            return None
+        with with_os_environ(self._wrapper.env):
+            #     from volttron.platform.web.admin_endpoints import AdminEndpoints
+            #     from volttrontesting.utils.web_utils import get_test_web_env
+            #
+            #     params = urlencode(dict(username='admin', password1='admin', password2='admin'))
+            #     env = get_test_web_env("/admin/setpassword", method='POST')  # , input_data=input)
+            #     adminep = AdminEndpoints()
+            #     resp = adminep.admin(env, params)
+            # else:
+            if messagebus == 'rmq':
+                data = dict(username=username, password1=password, password2=password)
+                url = self.bind_web_address + "/admin/setpassword"
+                # resp = requests.post(url, data=data,
+                # verify=self.certsobj.remote_cert_bundle_file())
+                resp = requests.post(url, data=data,
+                                     verify=self.certsobj.cert_file(name=self.certsobj.root_ca_name))
+                return resp
+            else:
+                return None
 
     def authenticate(self, username, password):
         data = dict(username=username, password=password)
