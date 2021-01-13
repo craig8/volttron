@@ -159,6 +159,8 @@ class ForwardHistorian(BaseHistorian):
         self.no_insert = True
         # We do not support the query RPC call.
         self.no_query = True
+        self._last_update_heartbeat_remote_publish = None
+        self._periodic_event_heartbeat = None
 
     def configure(self, configuration):
         custom_topic_set = set(configuration.get('custom_topic_list', []))
@@ -449,6 +451,47 @@ class ForwardHistorian(BaseHistorian):
                 STATUS_GOOD,"published {} items".format(
                     len(to_publish_list)))
 
+    def remote_heartbeat_published(self, peer, sender, bus, topic, headers, message):
+        _log.debug(f"Heartbeat published {message}")
+        self._last_update_heartbeat_remote_publish = datetime.datetime.now()
+
+    def _timeout_heartbeat_publish(self):
+        if self._periodic_event_heartbeat is not None:
+            self._periodic_event_heartbeat.cancel()
+
+        # Assume that we are connected, but haven't got the heartbeat publish yet, set now so it
+        # doesn't cascade
+        if self._last_update_heartbeat_remote_publish is None:
+            self._last_update_heartbeat_remote_publish = datetime.datetime.now()
+        else:
+            if self._last_update_heartbeat_remote_publish + datetime.timedelta(minutes=5) < datetime.datetime.now():
+                if self._target_platform is not None:
+                    try:
+                        self._target_platform.core.stop(timeout=5)
+                    except gevent.Timeout:
+                        _log.error("Couldn't stop target platform properly")
+                    finally:
+                        self._target_platform = None
+                        self.historian_setup()
+                else:
+                    self.historian_setup()
+
+        next_update_time = self._next_update_time(seconds=10)
+
+        self._periodic_event_heartbeat = self.core.schedule(
+            next_update_time, self._timeout_heartbeat_publish)
+
+    def _next_update_time(self, seconds=10):
+        """
+        Based upon the current time add 'seconds' to it and return that value.
+        :param seconds:
+        :return: time of next update
+        """
+        now = datetime.datetime.now()
+        next_update_time = now + datetime.timedelta(
+            seconds=seconds)
+        return next_update_time
+
     @doc_inherit
     def historian_setup(self):
         _log.debug("Setting up to forward to {}".format(self.destination_vip))
@@ -470,9 +513,12 @@ class ForwardHistorian(BaseHistorian):
         else:
             if isinstance(value, Agent):
                 self._target_platform = value
-
+                print("I am connected now!")
+                self._target_platform.vip.pubsub.subscribe('', f'/heartbeat/{self._target_platform.core.identity}',
+                                                           callback=self.remote_heartbeat_published)
                 self.vip.health.set_status(
                     STATUS_GOOD, "Connected to address ({})".format(address))
+                self._timeout_heartbeat_publish()
             else:
                 _log.error("Couldn't connect to address. Got Return value that is not Agent: ({})".format(address))
                 self.vip.health.set_status(STATUS_BAD, "Invalid agent detected.")
