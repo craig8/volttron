@@ -46,7 +46,7 @@ import datetime
 
 from zmq import ZMQError
 
-from volttron.platform.agent.known_identities import PLATFORM_TOPIC_WATCHER
+from volttron.platform.agent.known_identities import PLATFORM_TOPIC_WATCHER, CONTROL
 from volttron.platform.agent import utils
 from volttron.platform.messaging.health import Status, STATUS_BAD, STATUS_GOOD
 from volttron.platform.vip.agent import Agent, Core, RPC
@@ -72,6 +72,26 @@ class AlertAgent(Agent):
         self._resetting_remote_agent = False
         self.publish_remote = False
         self.publish_local = True
+        self._actions = self.config.get('actions')
+        self._restart_action_groups = {}
+
+        for action, value in self._actions.items():
+            if action == 'restart_agent':
+                for identity, groups in value.items():
+                    for group in groups:
+                        self._restart_action_groups[group] = identity
+
+        # "actions": [
+        #         "restart_agent": {
+        #             "platform.driver": [
+        #                 "group1"
+        #             ]
+        #             {
+        #                 "identity": "platform.driver",
+        #                 "groups": ["group1"]
+        #             }
+        #         ]
+        #     ],
 
         if self.publish_settings:
             self.publish_local = self.publish_settings.get('publish-local', True)
@@ -96,7 +116,7 @@ class AlertAgent(Agent):
 
     @property
     def remote_agent(self):
-        if self._remote_agent is None:
+        if self._remote_agent is None and self.publish_remote:
             if not self._creating_agent:
                 self._creating_agent = True
                 try:
@@ -181,7 +201,7 @@ class AlertAgent(Agent):
         self._connection.commit()
 
         for group_name, config in self.config.items():
-            if group_name != 'publish-settings':
+            if group_name not in ('publish-settings', 'actions'):
                 self.group_instances[group_name] = self.create_alert_group(group_name, config)
 
     def create_alert_group(self, group_name, config):
@@ -280,6 +300,7 @@ class AlertAgent(Agent):
 
             topics_timedout = set()
             alert_topics = set()
+            restart_agents = set()
 
             # Loop through topics in alert group
             for topic in self.group_instances[name].wait_time.keys():
@@ -287,6 +308,8 @@ class AlertAgent(Agent):
                 # Send an alert if a topic hasn't been
                 self.group_instances[name].topic_ttl[topic] -= 1
                 if self.group_instances[name].topic_ttl[topic] <= 0:
+                    if self._restart_action_groups.get(name):
+                        restart_agents.add(self._restart_action_groups.get(name))
                     alert_topics.add(topic)
                     self.group_instances[name].topic_ttl[topic] = self.group_instances[name].wait_time[topic]
                     if topic not in self.group_instances[name].unseen_topics:
@@ -300,6 +323,8 @@ class AlertAgent(Agent):
                         self.group_instances[name].point_ttl[topic][p] -= 1
                         if self.group_instances[name].point_ttl[topic][p] <= 0:
                             self.group_instances[name].point_ttl[topic][p] = self.group_instances[name].wait_time[topic]
+                            if self._restart_action_groups.get(name):
+                                restart_agents.add(self._restart_action_groups.get(name))
                             alert_topics.add((topic, p))
                             if (topic, p) not in self.group_instances[name].unseen_topics:
                                 topics_timedout.add((topic, p))
@@ -315,6 +340,18 @@ class AlertAgent(Agent):
 
             if topics_timedout:
                 self.group_instances[name].log_timeout(list(topics_timedout))
+
+            if restart_agents:
+                self.restart_agents(restart_agents)
+
+    def restart_agents(self, agents_to_restart):
+        agents = self.vip.rpc.call(CONTROL, "list_agents").get(timeout=2)
+        for identity in agents_to_restart:
+            for agent in agents:
+                if identity == agent['identity']:
+                    print(f"Restarting uuid {agent['uuid']}")
+                    self.vip.rpc.call(CONTROL, "restart_agent", agent['uuid']).get(timeout=5)
+
 
 
 class AlertGroup():
@@ -530,7 +567,6 @@ class AlertGroup():
                              "alert group. For topics not ending in "
                              "/all use standard topic configuration format in "
                              "alert agent configuration".format(parts))
-
 
     def send_alert(self, unseen_topics):
         """Send an alert for the group, summarizing missing topics.
